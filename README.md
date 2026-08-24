@@ -6,8 +6,9 @@
 
 ## Usage
 ### Run Client
+Windows
 ```
-myrayc -c "//example.com:443/?security=tls&path=%2Fsecret_path%2F"
+myrayc.exe -c "//example.com:443/?security=tls&path=%%2Fsecret_path%%2F"
 ```
 ### Run Chrome
 ```
