@@ -6,7 +6,8 @@
 
 ## Usage
 ### Run Client
-Windows
+Windows 
+在 .bat 中运行，百分号要双写转义
 ```
 myrayc.exe -c "//example.com:443/?security=tls&path=%%2Fsecret_path%%2F"
 ```
