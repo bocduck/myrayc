@@ -7,7 +7,6 @@
 ## Usage
 ### Run Client
 ```
-myrayc -c "//127.0.0.1:8080"
 myrayc -c "//example.com:443/?security=tls&path=%2Fsecret_path%2F"
 ```
 ### Run Chrome
