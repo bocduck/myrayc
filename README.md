@@ -6,8 +6,11 @@
 
 ## Usage
 ### Run Client
-Windows 
-在 .bat 中运行，百分号要双写转义
+Windows - 直接运行
+```
+myrayc.exe -c "//example.com:443/?security=tls&path=%2Fsecret_path%2F"
+```
+Windows - 在 .bat 中运行，百分号要双写转义
 ```
 myrayc.exe -c "//example.com:443/?security=tls&path=%%2Fsecret_path%%2F"
 ```
