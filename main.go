@@ -116,11 +116,25 @@ func handle(c net.Conn) {
 	}()
 
 	go func() {
-		err := unpackVLESSHUResponse(c, remote)
+		br, err := readHTTPUpgradeResponse(remote)
 		if err != nil {
 			errCh <- err
 			return
 		}
+
+		err = readVLESSResponse(br)
+		if err != nil {
+			errCh <- err
+			return
+		}
+
+		//Safely drain bufio.Reader
+		_, err = io.CopyN(c, br, int64(br.Buffered()))
+		if err != nil {
+			errCh <- err
+			return
+		}
+
 		_, err = io.Copy(c, remote)
 		errCh <- err
 	}()
@@ -275,51 +289,49 @@ func dialVLESSHU(host string, port uint16) (net.Conn, error) {
 	return conn, nil
 }
 
-func unpackVLESSHUResponse(dst, src net.Conn) error {
+func readHTTPUpgradeResponse(src net.Conn) (*bufio.Reader, error) {
 	br := bufio.NewReader(src)
 	resp, err := http.ReadResponse(br, nil)
 	if err != nil {
-		return err
+		return br, err
 	}
 
 	if resp.StatusCode != http.StatusSwitchingProtocols {
-		return fmt.Errorf("HTTPUpgrade: server returned %s", resp.Status)
+		return br, fmt.Errorf("HTTPUpgrade: server returned %s", resp.Status)
 	}
 
 	if strings.ToLower(resp.Header.Get("Upgrade")) != "websocket" {
-		return errors.New("HTTPUpgrade: missing Upgrade: websocket")
+		return br, errors.New("HTTPUpgrade: missing Upgrade: websocket")
 	}
 
 	if strings.ToLower(resp.Header.Get("Connection")) != "upgrade" {
-		return errors.New("HTTPUpgrade: missing Connection: Upgrade")
+		return br, errors.New("HTTPUpgrade: missing Connection: Upgrade")
 	}
+	return br, nil
+}
 
+func readVLESSResponse(c *bufio.Reader) error {
 	//VLESS Response
 	// Version
 	var version [1]byte
-	if _, err := io.ReadFull(br, version[:]); err != nil {
+	if _, err := io.ReadFull(c, version[:]); err != nil {
 		return err
 	}
 
 	// Addon length
 	var addonLen [1]byte
-	if _, err := io.ReadFull(br, addonLen[:]); err != nil {
+	if _, err := io.ReadFull(c, addonLen[:]); err != nil {
 		return err
 	}
 
 	// Addon
-	if _, err := io.CopyN(io.Discard, br, int64(addonLen[0])); err != nil {
+	if _, err := io.CopyN(io.Discard, c, int64(addonLen[0])); err != nil {
 		return err
 	}
-
-	io.CopyN(dst, br, int64(br.Buffered()))
-	fmt.Printf("br ahead:%d\n", br.Buffered())
-
 	return nil
-
 }
 
-func writeVLESSRequest(w io.Writer, host string, port uint16) error {
+func writeVLESSRequest(w net.Conn, host string, port uint16) error {
 	var b []byte
 
 	// Version
