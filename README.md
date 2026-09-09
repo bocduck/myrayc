@@ -6,13 +6,12 @@
 
 ## Usage
 ### Run Client
-Windows - 直接运行
+Windows
 ```
-myrayc.exe -c "//example.com:443/?security=tls&path=%2Fsecret_path"
+myrayc.exe -c "//example.com:443/?security=tls&path=/secret_path"
 ```
 Windows - 在 .bat 中运行，百分号要双写转义
-```
-myrayc.exe -c "//example.com:443/?security=tls&path=%%2Fsecret_path"
+/ = %2F = %%2F (on Windows .bat)
 ```
 多服务器随机分流
 ```
