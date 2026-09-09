@@ -10,8 +10,11 @@ Windows
 ```
 myrayc.exe -c "//example.com:443/?security=tls&path=/secret_path"
 ```
-Windows - 在 .bat 中运行，百分号要双写转义
-/ = %2F = %%2F (on Windows .bat)
+Windows - 在 .bat 中运行
+如果你的你的连接是URL编码过的
+百分号要双写转义
+```
+%2F -> %%2G
 ```
 多服务器随机分流
 ```
